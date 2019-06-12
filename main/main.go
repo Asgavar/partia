@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"database/sql"
+	"io/ioutil"
 	"fmt"
 	"os"
 
@@ -34,21 +35,25 @@ func main() {
 	dbPassword := gjson.Get(lines[0], "open.password").String()
 
 	if isItFirstRun {
-		createDbAndTables(dbName, dbLogin, dbPassword)
+		createDbAndRole(dbName, dbLogin, dbPassword)
 	}
 
 	dbUri := fmt.Sprintf(
 		"postgres://%s:%s@localhost/%s?sslmode=disable", dbLogin, dbPassword, dbName)
 
-	db, err := sql.Open("postgres", dbUri)
-	fmt.Println(err)
-	fmt.Println(db)
+	db, _ := sql.Open("postgres", dbUri)
+
+	if isItFirstRun {
+		sql, _ := ioutil.ReadFile("../setup-db.sql")
+		_, err := db.Query(string(sql))
+		fmt.Println(err)
+	}
 
 	// 	for _, commandInvocation := range lines[1:] {
 	// 	}
 }
 
-func createDbAndTables(db, login, password string) {
+func createDbAndRole(db, login, password string) {
 	dbAsInit, _ := sql.Open("postgres", "postgres://init:qwerty@localhost?sslmode=disable")
 
 	createRoleSql := fmt.Sprintf("CREATE ROLE %s LOGIN PASSWORD '%s'", login, password)
@@ -58,8 +63,6 @@ func createDbAndTables(db, login, password string) {
 	dbAsInit.Query(createRoleSql)
 	dbAsInit.Query(createDbSql)
 	dbAsInit.Query(grantConnectSql)
-
-	// TODO create actual tables
 }
 
 func openDbConnection() {
