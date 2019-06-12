@@ -9,10 +9,10 @@ import (
 
 	_ "github.com/lib/pq"
 	"github.com/tidwall/gjson"
-	// "github.com/asgavar/partia"
+	"github.com/asgavar/partia"
 )
 
-// import "github.com/asgavar/partia"
+var DB *sql.DB
 
 func main() {
 	args := os.Args[1:]
@@ -41,16 +41,17 @@ func main() {
 	dbUri := fmt.Sprintf(
 		"postgres://%s:%s@localhost/%s?sslmode=disable", dbLogin, dbPassword, dbName)
 
-	db, _ := sql.Open("postgres", dbUri)
+	DB, _ = sql.Open("postgres", dbUri)
 
 	if isItFirstRun {
 		sql, _ := ioutil.ReadFile("../setup-db.sql")
-		_, err := db.Query(string(sql))
+		_, err := DB.Query(string(sql))
 		fmt.Println(err)
 	}
 
-	// 	for _, commandInvocation := range lines[1:] {
-	// 	}
+	for _, commandInvocation := range lines[1:] {
+		partia.Dispatch(commandInvocation)
+	}
 }
 
 func createDbAndRole(db, login, password string) {
@@ -63,8 +64,4 @@ func createDbAndRole(db, login, password string) {
 	dbAsInit.Query(createRoleSql)
 	dbAsInit.Query(createDbSql)
 	dbAsInit.Query(grantConnectSql)
-}
-
-func openDbConnection() {
-
 }
