@@ -10,14 +10,14 @@ func Leader(rawJson string) PartiaOutput {
 	member := int(gjson.Get(rawJson, "leader.member").Int())
 
 	if HasNumberAlreadyBeenUsed(member) {
-		return PartiaOutput{Status: "ERROR"}
+		return error()
 	}
 
 	CreateMember(member, password)
 	UpdateMemberLastActive(member, timestamp)
 	MarkMemberAsLeader(member)
 
-	return PartiaOutput{Status: "OK"}
+	return error()
 }
 
 func Support(rawJson string) PartiaOutput {
@@ -62,32 +62,36 @@ func support_or_protest(rawJson, whatDoWeDo string) PartiaOutput {
 
 	if DoesMemberExist(member) {
 		if (! (AreMemberCredsCorrect(member, password) && IsMemberActiveEnough(member))) {
-			return PartiaOutput{Status: "ERROR"}
+			return error()
 		}
 	} else {
 		if ! HasNumberAlreadyBeenUsed(member) {
 			CreateMember(member, password)
 		} else {
-			return PartiaOutput{Status: "ERROR"}
+			return error()
 		}
 	}
 
 	if ! DoesProjectExist(project) {
 		if HasNumberAlreadyBeenUsed(project) {
-			return PartiaOutput{Status: "ERROR"}
+			return error()
 		}
 		if (! DoesAuthorityExist(authority)) && (authority == 0 || HasNumberAlreadyBeenUsed(authority)) {
-			return PartiaOutput{Status: "ERROR"}
+			return error()
 		}
 		CreateProjectAndMaybeAuthority(project, authority)
 	}
 
 	if HasNumberAlreadyBeenUsed(action) {
-		return PartiaOutput{Status: "Error"}
+		return error()
 	}
 
 	CreateAction(action, member, project, whatDoWeDo)
 	UpdateMemberLastActive(member, timestamp)
 
-	return PartiaOutput{}
+	return PartiaOutput{Status: "OK"}
+}
+
+func error() PartiaOutput {
+	return PartiaOutput{Status: "Error"}
 }
