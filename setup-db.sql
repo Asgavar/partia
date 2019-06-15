@@ -35,7 +35,6 @@ CREATE TABLE already_used_numbers (
 );
 
 CREATE TABLE vote (
-  timestamp TIMESTAMP,
   member_id INTEGER REFERENCES member(id),
   action_id INTEGER REFERENCES action(id)
 );

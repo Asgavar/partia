@@ -28,6 +28,10 @@ func Dispatch(rawJson string) PartiaOutput {
 		return Support(rawJson)
 	case "protest":
 		return Protest(rawJson)
+	case "upvote":
+		return Upvote(rawJson)
+	case "downvote":
+		return Downvote(rawJson)
 	default:
 		// TODO
 		return Leader(rawJson)

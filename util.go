@@ -8,14 +8,14 @@ import (
 
 func DoesMemberExist(id int) bool {
 	var count int
-	DB.QueryRow("SELECT count(*) FROM member where id = $1", id).Scan(&count)
+	DB.QueryRow("SELECT count(*) FROM member WHERE id = $1", id).Scan(&count)
 	return count == 1
 }
 
 func HasNumberAlreadyBeenUsed(number int) bool {
 	var count int
 	DB.QueryRow(
-		"SELECT count(*) FROM already_used_numbers where number = $1", number).Scan(&count)
+		"SELECT count(*) FROM already_used_numbers WHERE number = $1", number).Scan(&count)
 	fmt.Println(count)
 	return count == 1
 }
@@ -62,13 +62,19 @@ func IsMemberActiveEnough(member_id int) bool {
 
 func DoesProjectExist(project_id int) bool {
 	var count int
-	DB.QueryRow("SELECT count(*) FROM project where id = $1", project_id).Scan(&count)
+	DB.QueryRow("SELECT count(*) FROM project WHERE id = $1", project_id).Scan(&count)
 	return count == 1
 }
 
 func DoesAuthorityExist(authority_id int) bool {
 	var count int
-	DB.QueryRow("SELECT count(*) FROM authority where id = $1", authority_id).Scan(&count)
+	DB.QueryRow("SELECT count(*) FROM authority WHERE id = $1", authority_id).Scan(&count)
+	return count == 1
+}
+
+func DoesActionExist(action_id int) bool {
+	var count int
+	DB.QueryRow("SELECT count(*) FROM action WHERE id = $1", action_id).Scan(&count)
 	return count == 1
 }
 
@@ -93,6 +99,21 @@ func CreateAction(action_id, proposed_by_member, project_id int, of_type string)
 	fmt.Println(err)
 }
 
+func HasUserAlreadyVotedForThisAction(member_id, action_id int) bool {
+	var count int
+	DB.QueryRow(
+		"SELECT count(*) FROM vote WHERE member_id = $1 AND action_id = $2",
+		member_id, action_id).Scan(&count)
+	return count == 1
+}
+
+func InsertVote(member_id, action_id int, up_or_down string) {
+	_, err := DB.Query(
+		"INSERT INTO "+up_or_down+"vote (member_id, action_id) "+
+			"VALUES ($1, $2)", member_id, action_id)
+	fmt.Println(err)
+}
+
 func markNumberAsUsed(number int) {
 	DB.Query(
 		"INSERT INTO already_used_numbers VALUES ($1)", number)
@@ -102,3 +123,6 @@ func hashPassword(password string) []byte {
 	hashed, _ := bcrypt.GenerateFromPassword([]byte(password), 10)
 	return hashed
 }
+
+// TODO: aktywnosc na podstawie timestampe'ow
+// TODO: trolltracker
