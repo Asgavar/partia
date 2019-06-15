@@ -6,12 +6,12 @@ import (
 )
 
 type PartiaOutput struct {
-	status string
-	data []interface{}
-	debug string
+	Status string
+	Data []interface{}
+	Debug string
 }
 
-func Dispatch(rawJson string){
+func Dispatch(rawJson string) PartiaOutput {
 	var buf map[string]interface{}
 	var commandName string
 
@@ -23,8 +23,13 @@ func Dispatch(rawJson string){
 
 	switch commandName {
 	case "leader":
-		Leader(rawJson)
+		return Leader(rawJson)
+	case "support":
+		return Support(rawJson)
+	case "protest":
+		return Protest(rawJson)
 	default:
 		// TODO
+		return Leader(rawJson)
 	}
 }

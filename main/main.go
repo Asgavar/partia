@@ -44,6 +44,8 @@ func main() {
 	}
 
 	for _, commandInvocation := range lines[1:] {
-		partia.Dispatch(commandInvocation)
+		cmd_output := partia.Dispatch(commandInvocation)
+		// TODO: funkcja
+		fmt.Println(cmd_output)
 	}
 }

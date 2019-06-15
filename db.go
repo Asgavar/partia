@@ -9,6 +9,7 @@ var DB *sql.DB
 
 func CreateDbAndRole(db, login, password string) {
 	dbAsInit, _ := sql.Open("postgres", "postgres://init:qwerty@localhost?sslmode=disable")
+	defer dbAsInit.Close()
 
 	createRoleSql := fmt.Sprintf("CREATE ROLE %s LOGIN PASSWORD '%s'", login, password)
 	createDbSql := fmt.Sprintf("CREATE DATABASE %s", db)

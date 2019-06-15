@@ -4,11 +4,11 @@ CREATE TABLE member (
 );
 
 CREATE TABLE member_isleader (
-  member_id INTEGER REFERENCES member(id)
+  member_id INTEGER REFERENCES member(id) PRIMARY KEY
 );
 
 CREATE TABLE member_lastactive (
-  member_id INTEGER REFERENCES member(id),
+  member_id INTEGER REFERENCES member(id) PRIMARY KEY,
   last_active TIMESTAMP
 );
 
