@@ -55,5 +55,8 @@ func RenderOutputJson(output PartiaOutput) string {
 	jsoned = strings.ReplaceAll(jsoned, "Data", "data")
 	jsoned = strings.ReplaceAll(jsoned, "Debug", "debug")
 
+	jsoned = strings.ReplaceAll(jsoned, ",", ", ")
+	jsoned = strings.ReplaceAll(jsoned, ":", ": ")
+
 	return jsoned
 }
