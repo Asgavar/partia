@@ -28,8 +28,11 @@ func AreMemberCredsCorrect(id int, unhashedPassword string) bool {
 	return err == nil
 }
 
-func IsUserActive(id string) {
-
+func IsMemberLeader(id int) bool {
+	var count int
+	DB.QueryRow(
+		"SELECT count(*) FROM member_isleader WHERE member_id = $1", id).Scan(&count)
+	return count > 0
 }
 
 func CreateMember(id int, unhashedPassword string) {
