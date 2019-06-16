@@ -33,7 +33,6 @@ func Dispatch(rawJson string) PartiaOutput {
 	case "downvote":
 		return Downvote(rawJson)
 	default:
-		// TODO
-		return Leader(rawJson)
+		return PartiaError()
 	}
 }

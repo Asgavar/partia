@@ -11,14 +11,14 @@ func Leader(rawJson string) PartiaOutput {
 	member := int(gjson.Get(rawJson, "leader.member").Int())
 
 	if HasNumberAlreadyBeenUsed(member) {
-		return error()
+		return PartiaError()
 	}
 
 	CreateMember(member, password)
 	UpdateMemberLastActive(member, timestamp)
 	MarkMemberAsLeader(member)
 
-	return error()
+	return PartiaOutput{Status: "OK"}
 }
 
 func Support(rawJson string) PartiaOutput {
@@ -63,28 +63,28 @@ func support_or_protest(rawJson, whatDoWeDo string) PartiaOutput {
 
 	if DoesMemberExist(member) {
 		if !(AreMemberCredsCorrect(member, password) && IsMemberActiveEnough(member, timestamp)) {
-			return error()
+			return PartiaError()
 		}
 	} else {
 		if !HasNumberAlreadyBeenUsed(member) {
 			CreateMember(member, password)
 		} else {
-			return error()
+			return PartiaError()
 		}
 	}
 
 	if !DoesProjectExist(project) {
 		if HasNumberAlreadyBeenUsed(project) {
-			return error()
+			return PartiaError()
 		}
 		if (!DoesAuthorityExist(authority)) && (authority == 0 || HasNumberAlreadyBeenUsed(authority)) {
-			return error()
+			return PartiaError()
 		}
 		CreateProjectAndMaybeAuthority(project, authority)
 	}
 
 	if HasNumberAlreadyBeenUsed(action) {
-		return error()
+		return PartiaError()
 	}
 
 	CreateAction(action, member, project, whatDoWeDo)
@@ -102,18 +102,18 @@ func vote(rawJson, upOrDown string) PartiaOutput {
 
 	if DoesMemberExist(member) {
 		if !(AreMemberCredsCorrect(member, password) && IsMemberActiveEnough(member, timestamp)) {
-			return error()
+			return PartiaError()
 		}
 	} else {
 		if !HasNumberAlreadyBeenUsed(member) {
 			CreateMember(member, password)
 		} else {
-			return error()
+			return PartiaError()
 		}
 	}
 
 	if HasUserAlreadyVotedForThisAction(member, action) || ! DoesActionExist(action) {
-		return error()
+		return PartiaError()
 	}
 
 	InsertVote(member, action, upOrDown)
@@ -122,6 +122,6 @@ func vote(rawJson, upOrDown string) PartiaOutput {
 	return PartiaOutput{Status: "OK"}
 }
 
-func error() PartiaOutput {
-	return PartiaOutput{Status: "Error"}
+func PartiaError() PartiaOutput {
+	return PartiaOutput{Status: "ERROR"}
 }
