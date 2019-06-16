@@ -39,8 +39,7 @@ func main() {
 
 	if isItFirstRun {
 		sql, _ := ioutil.ReadFile("../setup-db.sql")
-		_, err := partia.DB.Query(string(sql))
-		fmt.Println(err)
+		partia.DB.Query(string(sql))
 	}
 
 	for _, commandInvocation := range lines[1:] {

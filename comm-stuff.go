@@ -2,7 +2,6 @@ package partia
 
 import (
 	"encoding/json"
-	"fmt"
 	"strings"
 )
 
@@ -17,7 +16,6 @@ func Dispatch(rawJson string) PartiaOutput {
 	var commandName string
 
 	json.Unmarshal([]byte(rawJson), &buf)
-	fmt.Println(buf)
 	for key := range buf { // actually, there's only one key there
 		commandName = key
 	}

@@ -1,7 +1,6 @@
 package partia
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/tidwall/gjson"
@@ -84,9 +83,7 @@ func Actions(rawJson string) PartiaOutput {
 
 	sql += " ORDER BY action ASC"
 
-	rows, err := DB.Query(sql, queryArgs...)
-	fmt.Println("ERR -> ", err)
-	fmt.Println("ROWS -> ", rows)
+	rows, _ := DB.Query(sql, queryArgs...)
 
 	var data []interface{}
 
@@ -99,20 +96,13 @@ func Actions(rawJson string) PartiaOutput {
 	var downvotes int
 
 	for rows.Next() {
-		err := rows.Scan(
+		rows.Scan(
 			&action_id, &action_type, &project_id, &authority_id)
-		fmt.Println(err)
-		fmt.Println(
-			action_id, action_type, project_id, authority_id)
 
-		err = DB.QueryRow(
+		DB.QueryRow(
 			"SELECT count(*) FROM upvote WHERE action_id = $1", action_id).Scan(&upvotes)
-		fmt.Println(err)
-		fmt.Println(upvotes, "UPVOTES")
-		err = DB.QueryRow(
+		DB.QueryRow(
 			"SELECT count(*) FROM downvote WHERE action_id = $1", action_id).Scan(&downvotes)
-		fmt.Println(err)
-		fmt.Println(downvotes, "DOWNVOTES")
 
 		rowInOutput := []interface{}{action_id, action_type, project_id, authority_id, upvotes, downvotes}
 		data = append(data, rowInOutput)
@@ -153,12 +143,10 @@ func Projects(rawJson string) PartiaOutput {
 		data []interface{}
 	)
 
-	rows, err := DB.Query(sql, queryArgs...)
-	fmt.Println(err)
+	rows, _ := DB.Query(sql, queryArgs...)
 
 	for rows.Next() {
-		err := rows.Scan(&project_id, &authority_id)
-		fmt.Println(err)
+		rows.Scan(&project_id, &authority_id)
 		rowInOutput := []interface{}{project_id, authority_id}
 		data = append(data, rowInOutput)
 	}
@@ -193,9 +181,8 @@ func Votes(rawJson string) PartiaOutput {
 		if action != 0 {
 			action_ids = []interface{}{action}
 		} else {
-			actions_from_db, err := DB.Query(
+			actions_from_db, _ := DB.Query(
 				"SELECT id FROM action WHERE project_id = $1", project)
-			fmt.Println(err)
 			for actions_from_db.Next() {
 				var new_action_id int
 				actions_from_db.Scan(&new_action_id)
@@ -206,8 +193,7 @@ func Votes(rawJson string) PartiaOutput {
 
 	var data []interface{}
 
-	all_users_from_db, err := DB.Query("SELECT id FROM member ORDER BY id ASC")
-	fmt.Println(err)
+	all_users_from_db, _ := DB.Query("SELECT id FROM member ORDER BY id ASC")
 	for all_users_from_db.Next() {
 		var new_user_id int
 		var tmp_upvotes int
@@ -218,30 +204,24 @@ func Votes(rawJson string) PartiaOutput {
 		all_users_from_db.Scan(&new_user_id)
 
 		if len(action_ids) == 0 {  // i.e. no filtering required
-			err := DB.QueryRow(
+			DB.QueryRow(
 				"SELECT count(*) FROM upvote WHERE member_id = $1", new_user_id).Scan(&upvotes_total)
-			fmt.Println(err)
-			err = DB.QueryRow(
+			DB.QueryRow(
 				"SELECT count(*) FROM downvote WHERE member_id = $1", new_user_id).Scan(&downvotes_total)
-			fmt.Println(err)
 		}
 
 		for _, action_id := range action_ids {
-			err := DB.QueryRow(
+			DB.QueryRow(
 				"SELECT count(*) FROM upvote WHERE member_id = $1 AND action_id = $2",
 				new_user_id, action_id).Scan(&tmp_upvotes)
-			fmt.Println(err)
 			upvotes_total += tmp_upvotes
 
-			err = DB.QueryRow(
+			DB.QueryRow(
 				"SELECT count(*) FROM downvote WHERE member_id = $1 AND action_id = $2",
 				new_user_id, action_id).Scan(&tmp_downvotes)
-			fmt.Println(err)
 			upvotes_total += tmp_upvotes
 			downvotes_total += tmp_downvotes
 		}
-		fmt.Println(upvotes_total, "UPVOTE TOTAL")
-		fmt.Println(downvotes_total, "DOWNVOTE TOTAL")
 
 		data = append(data, []interface{}{new_user_id, upvotes_total, downvotes_total})
 	}
@@ -300,7 +280,6 @@ func vote(rawJson, upOrDown string) PartiaOutput {
 	member := int(gjson.Get(rawJson, upOrDown+"vote.member").Int())
 	password := gjson.Get(rawJson, upOrDown+"vote.password").String()
 	action := int(gjson.Get(rawJson, upOrDown+"vote.action").Int())
-	fmt.Println(password, "PASSWORD")
 
 	if DoesMemberExist(member) {
 		if !(AreMemberCredsCorrect(member, password) && IsMemberActiveEnough(member, timestamp)) {
