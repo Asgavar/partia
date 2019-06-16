@@ -3,12 +3,13 @@ package partia
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 type PartiaOutput struct {
 	Status string
-	Data []interface{}
-	Debug string
+	Data   []interface{}
+	Debug  string
 }
 
 func Dispatch(rawJson string) PartiaOutput {
@@ -17,7 +18,7 @@ func Dispatch(rawJson string) PartiaOutput {
 
 	json.Unmarshal([]byte(rawJson), &buf)
 	fmt.Println(buf)
-	for key := range buf {  // actually, there's only one key there
+	for key := range buf { // actually, there's only one key there
 		commandName = key
 	}
 
@@ -41,4 +42,18 @@ func Dispatch(rawJson string) PartiaOutput {
 	default:
 		return PartiaError()
 	}
+}
+
+func RenderOutputJson(output PartiaOutput) string {
+	jsonedAsBytes, _ := json.Marshal(output)
+	jsoned := string(jsonedAsBytes)
+
+	jsoned = strings.ReplaceAll(jsoned, ",\"Data\":null", "")
+	jsoned = strings.ReplaceAll(jsoned, ",\"Debug\":\"\"", "")
+
+	jsoned = strings.ReplaceAll(jsoned, "Status", "status")
+	jsoned = strings.ReplaceAll(jsoned, "Data", "data")
+	jsoned = strings.ReplaceAll(jsoned, "Debug", "debug")
+
+	return jsoned
 }

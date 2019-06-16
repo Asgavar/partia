@@ -45,7 +45,6 @@ func main() {
 
 	for _, commandInvocation := range lines[1:] {
 		cmd_output := partia.Dispatch(commandInvocation)
-		// TODO: funkcja
-		fmt.Println(cmd_output)
+		fmt.Println(partia.RenderOutputJson(cmd_output))
 	}
 }
