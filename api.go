@@ -82,6 +82,8 @@ func Actions(rawJson string) PartiaOutput {
 		queryArgs = append(queryArgs, authority)
 	}
 
+	sql += " ORDER BY action ASC"
+
 	rows, err := DB.Query(sql, queryArgs...)
 	fmt.Println("ERR -> ", err)
 	fmt.Println("ROWS -> ", rows)
@@ -142,6 +144,8 @@ func Projects(rawJson string) PartiaOutput {
 		sql += " WHERE authority = $1"
 		queryArgs = append(queryArgs, authority)
 	}
+
+	sql += " ORDER BY project ASC"
 
 	var (
 		project_id int
