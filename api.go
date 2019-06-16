@@ -214,11 +214,10 @@ func Votes(rawJson string) PartiaOutput {
 			DB.QueryRow(
 				"SELECT count(*) FROM upvote WHERE member_id = $1 AND action_id = $2",
 				new_user_id, action_id).Scan(&tmp_upvotes)
-			upvotes_total += tmp_upvotes
-
 			DB.QueryRow(
 				"SELECT count(*) FROM downvote WHERE member_id = $1 AND action_id = $2",
 				new_user_id, action_id).Scan(&tmp_downvotes)
+
 			upvotes_total += tmp_upvotes
 			downvotes_total += tmp_downvotes
 		}

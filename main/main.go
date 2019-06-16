@@ -36,6 +36,7 @@ func main() {
 	}
 
 	partia.OpenConnection(dbName, dbLogin, dbPassword)
+	fmt.Println("{\"status\": \"OK\"}")
 
 	if isItFirstRun {
 		sql, _ := ioutil.ReadFile("../setup-db.sql")
