@@ -62,7 +62,7 @@ func support_or_protest(rawJson, whatDoWeDo string) PartiaOutput {
 	authority := int(gjson.Get(rawJson, whatDoWeDo+".authority").Int())
 
 	if DoesMemberExist(member) {
-		if !(AreMemberCredsCorrect(member, password) && IsMemberActiveEnough(member)) {
+		if !(AreMemberCredsCorrect(member, password) && IsMemberActiveEnough(member, timestamp)) {
 			return error()
 		}
 	} else {
@@ -101,7 +101,7 @@ func vote(rawJson, upOrDown string) PartiaOutput {
 	fmt.Println(password, "PASWORD")
 
 	if DoesMemberExist(member) {
-		if !(AreMemberCredsCorrect(member, password) && IsMemberActiveEnough(member)) {
+		if !(AreMemberCredsCorrect(member, password) && IsMemberActiveEnough(member, timestamp)) {
 			return error()
 		}
 	} else {

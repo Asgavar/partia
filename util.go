@@ -51,11 +51,11 @@ func MarkMemberAsLeader(member_id int) {
 		"INSERT INTO member_isleader VALUES ($1)", member_id)
 }
 
-func IsMemberActiveEnough(member_id int) bool {
+func IsMemberActiveEnough(member_id int, timestamp string) bool {
 	var is_he_or_she bool
 	DB.QueryRow(
-		"SELECT NOW() - last_active < '365 days' FROM member_lastactive WHERE member_id = $1",
-		member_id).Scan(&is_he_or_she)
+		"SELECT TO_TIMESTAMP($1) - last_active < '365 days' FROM member_lastactive WHERE member_id = $2",
+		timestamp, member_id).Scan(&is_he_or_she)
 	fmt.Println(is_he_or_she)
 	return is_he_or_she
 }
@@ -124,5 +124,4 @@ func hashPassword(password string) []byte {
 	return hashed
 }
 
-// TODO: aktywnosc na podstawie timestampe'ow
 // TODO: trolltracker
