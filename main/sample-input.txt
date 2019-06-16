@@ -1,10 +1,13 @@
 { "open": { "database": "student", "login": "app", "password": "qwerty"}}
-{ "leader": { "timestamp": 1557473000, "password": "abc", "member": 1}}
-{ "leader": { "timestamp": 1557474000, "password": "asd", "member": 2}}
 { "protest": { "timestamp": 1557475700, "password": "123", "member": 3, "action":500, "project":5000, "authority":10000}}
 { "support": { "timestamp": 1557475701, "password": "123", "member": 3, "action":600, "project":5000}}
 { "upvote": { "timestamp": 1557475702, "password": "asd", "member": 2, "action":500}}
 { "downvote": { "timestamp": 1557475703, "password": "abc", "member": 1, "action":500}}
 { "downvote": { "timestamp": 1557475704, "password": "abc", "member": 1, "action":600}}
 
-{"actions": {"timestamp": 1557475796, "password": "abc", "member": 1}}
+{ "votes": { "timestamp": 1557475715, "password": "abc", "member": 1}} 
+-- głosy filtrowane po akcji
+{ "votes": { "timestamp": 1557475715, "password": "abc", "member": 1, "action":500}}
+-- głosy filtrowane po projekcie
+{ "votes": { "timestamp": 1557475715, "password": "abc", "member": 1, "project": 5000}}
+{ "votes": { "timestamp": 1557475715, "password": "abc", "member": 1}} 

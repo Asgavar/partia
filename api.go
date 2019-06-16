@@ -168,8 +168,87 @@ func Projects(rawJson string) PartiaOutput {
 	return PartiaOutput{Status: "OK", Data: data}
 }
 
-func Votes(rawJson string) {
+func Votes(rawJson string) PartiaOutput {
+	timestamp := gjson.Get(rawJson, "votes.timestamp").String()
+	member := int(gjson.Get(rawJson, "votes.member").Int())
+	password := gjson.Get(rawJson, "votes.password").String()
+	action := int(gjson.Get(rawJson, "votes.action").Int())
+	project := int(gjson.Get(rawJson, "votes.project").Int())
 
+	if DoesMemberExist(member) && IsMemberLeader(member) {
+		if !AreMemberCredsCorrect(member, password) {
+			return PartiaError()
+		}
+	} else {
+		return PartiaError()
+	}
+
+	if action != 0 && project != 0 {
+		return PartiaError()
+	}
+
+	var action_ids []interface{}
+
+	if action != 0 || project != 0 {
+		if action != 0 {
+			action_ids = []interface{}{action}
+		} else {
+			actions_from_db, err := DB.Query(
+				"SELECT id FROM action WHERE project_id = $1", project)
+			fmt.Println(err)
+			for actions_from_db.Next() {
+				var new_action_id int
+				actions_from_db.Scan(&new_action_id)
+				action_ids = append(action_ids, new_action_id)
+			}
+		}
+	}
+
+	var data []interface{}
+
+	all_users_from_db, err := DB.Query("SELECT id FROM member ORDER BY id ASC")
+	fmt.Println(err)
+	for all_users_from_db.Next() {
+		var new_user_id int
+		var tmp_upvotes int
+		var tmp_downvotes int
+		var upvotes_total int
+		var downvotes_total int
+
+		all_users_from_db.Scan(&new_user_id)
+
+		if len(action_ids) == 0 {  // i.e. no filtering required
+			err := DB.QueryRow(
+				"SELECT count(*) FROM upvote WHERE member_id = $1", new_user_id).Scan(&upvotes_total)
+			fmt.Println(err)
+			err = DB.QueryRow(
+				"SELECT count(*) FROM downvote WHERE member_id = $1", new_user_id).Scan(&downvotes_total)
+			fmt.Println(err)
+		}
+
+		for _, action_id := range action_ids {
+			err := DB.QueryRow(
+				"SELECT count(*) FROM upvote WHERE member_id = $1 AND action_id = $2",
+				new_user_id, action_id).Scan(&tmp_upvotes)
+			fmt.Println(err)
+			upvotes_total += tmp_upvotes
+
+			err = DB.QueryRow(
+				"SELECT count(*) FROM downvote WHERE member_id = $1 AND action_id = $2",
+				new_user_id, action_id).Scan(&tmp_downvotes)
+			fmt.Println(err)
+			upvotes_total += tmp_upvotes
+			downvotes_total += tmp_downvotes
+		}
+		fmt.Println(upvotes_total, "UPVOTE TOTAL")
+		fmt.Println(downvotes_total, "DOWNVOTE TOTAL")
+
+		data = append(data, []interface{}{new_user_id, upvotes_total, downvotes_total})
+	}
+
+	UpdateMemberLastActive(member, timestamp)
+
+	return PartiaOutput{Status: "OK", Data: data}
 }
 
 func Trolls(rawJson string) {
