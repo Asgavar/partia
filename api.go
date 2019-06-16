@@ -235,8 +235,24 @@ func Votes(rawJson string) PartiaOutput {
 	return PartiaOutput{Status: "OK", Data: data}
 }
 
-func Trolls(rawJson string) {
+func Trolls(rawJson string) PartiaOutput {
+	timestamp := gjson.Get(rawJson, "trolls.timestamp").String()
 
+	rows, _ := DB.Query("SELECT * FROM trolltracker WHERE saldo < 0")
+	var data []interface{}
+
+	for rows.Next() {
+		var member_id int
+		var saldo int
+		var upvotes int
+		var downvotes int
+
+		rows.Scan(&member_id, &saldo, &upvotes, &downvotes)
+		active := IsMemberActiveEnough(member_id, timestamp)
+		data = append(data, []interface{}{member_id, upvotes, downvotes, active})
+	}
+
+	return PartiaOutput{Status: "OK", Data: data}
 }
 
 func support_or_protest(rawJson, whatDoWeDo string) PartiaOutput {

@@ -44,14 +44,20 @@ CREATE TABLE downvote () INHERITS(vote);
 
 CREATE TABLE trolltracker (
   member_id INTEGER REFERENCES member(id),
-  saldo INTEGER
+  saldo INTEGER,
+  ups INTEGER,
+  downs INTEGER
 );
 
 CREATE OR REPLACE FUNCTION increment_trolltracker() RETURNS trigger AS $xD$
-  BEGIN
-    UPDATE trolltracker SET saldo = saldo + 1 WHERE member_id = NEW.member_id;
-    RETURN NEW;
-  END
+  DECLARE
+  proposer INTEGER;
+BEGIN
+  proposer := (SELECT proposed_by FROM action WHERE action.id = NEW.action_id);
+  UPDATE trolltracker SET saldo = saldo + 1 WHERE member_id = proposer;
+  UPDATE trolltracker SET ups = ups + 1 WHERE member_id = proposer;
+  RETURN NEW;
+END
 $xD$ LANGUAGE plpgsql;
 
 CREATE TRIGGER upvote_trolltracker
@@ -60,8 +66,12 @@ CREATE TRIGGER upvote_trolltracker
     EXECUTE PROCEDURE increment_trolltracker();
 
 CREATE OR REPLACE FUNCTION decrement_trolltracker() RETURNS trigger AS $xD$
+  DECLARE
+  proposer INTEGER;
 BEGIN
-  UPDATE trolltracker SET saldo = saldo - 1 WHERE member_id = NEW.member_id;
+  proposer := (SELECT proposed_by FROM action WHERE action.id = NEW.action_id);
+  UPDATE trolltracker SET saldo = saldo - 1 WHERE member_id = proposer;
+  UPDATE trolltracker SET downs = downs + 1 WHERE member_id = proposer;
   RETURN NEW;
 END
 $xD$ LANGUAGE plpgsql;
@@ -73,7 +83,7 @@ CREATE TRIGGER downvote_trolltracker
 
 CREATE OR REPLACE FUNCTION create_a_trolltracker_entry() RETURNS trigger AS $xD$
 BEGIN
-  INSERT INTO trolltracker VALUES (NEW.id, 0);
+  INSERT INTO trolltracker VALUES (NEW.id, 0, 0, 0);
   RETURN NEW;
 END
 $xD$ LANGUAGE plpgsql;

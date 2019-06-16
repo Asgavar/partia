@@ -37,6 +37,8 @@ func Dispatch(rawJson string) PartiaOutput {
 		return Projects(rawJson)
 	case "votes":
 		return Votes(rawJson)
+	case "trolls":
+		return Trolls(rawJson)
 	default:
 		return PartiaError()
 	}
