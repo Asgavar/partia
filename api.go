@@ -121,8 +121,47 @@ func Actions(rawJson string) PartiaOutput {
 	return PartiaOutput{Status: "OK", Data: data}
 }
 
-func Projects(rawJson string) {
+func Projects(rawJson string) PartiaOutput {
+	timestamp := gjson.Get(rawJson, "projects.timestamp").String()
+	member := int(gjson.Get(rawJson, "projects.member").Int())
+	password := gjson.Get(rawJson, "projects.password").String()
+	authority := int(gjson.Get(rawJson, "projects.authority").Int())
 
+	if DoesMemberExist(member) && IsMemberLeader(member) {
+		if !AreMemberCredsCorrect(member, password) {
+			return PartiaError()
+		}
+	} else {
+		return PartiaError()
+	}
+
+	var queryArgs []interface{}
+	sql := "SELECT * FROM project"
+
+	if authority != 0 {
+		sql += " WHERE authority = $1"
+		queryArgs = append(queryArgs, authority)
+	}
+
+	var (
+		project_id int
+		authority_id int
+		data []interface{}
+	)
+
+	rows, err := DB.Query(sql, queryArgs...)
+	fmt.Println(err)
+
+	for rows.Next() {
+		err := rows.Scan(&project_id, &authority_id)
+		fmt.Println(err)
+		rowInOutput := []interface{}{project_id, authority_id}
+		data = append(data, rowInOutput)
+	}
+
+	UpdateMemberLastActive(member, timestamp)
+
+	return PartiaOutput{Status: "OK", Data: data}
 }
 
 func Votes(rawJson string) {
