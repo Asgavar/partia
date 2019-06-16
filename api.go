@@ -254,6 +254,10 @@ func support_or_protest(rawJson, whatDoWeDo string) PartiaOutput {
 		}
 	}
 
+	if HasNumberAlreadyBeenUsed(action) {
+		return PartiaError()
+	}
+
 	if !DoesProjectExist(project) {
 		if HasNumberAlreadyBeenUsed(project) {
 			return PartiaError()
@@ -262,10 +266,6 @@ func support_or_protest(rawJson, whatDoWeDo string) PartiaOutput {
 			return PartiaError()
 		}
 		CreateProjectAndMaybeAuthority(project, authority)
-	}
-
-	if HasNumberAlreadyBeenUsed(action) {
-		return PartiaError()
 	}
 
 	CreateAction(action, member, project, whatDoWeDo)

@@ -94,6 +94,7 @@ func CreateAction(action_id, proposed_by_member, project_id int, of_type string)
 	DB.Query(
 		"INSERT INTO action VALUES ($1, $2, $3, $4)",
 		action_id, proposed_by_member, project_id, of_type)
+	markNumberAsUsed(action_id)
 }
 
 func HasUserAlreadyVotedForThisAction(member_id, action_id int) bool {
