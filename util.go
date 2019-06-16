@@ -21,8 +21,11 @@ func HasNumberAlreadyBeenUsed(number int) bool {
 }
 
 func AreMemberCredsCorrect(id int, unhashedPassword string) bool {
-	// TODO
-	return true
+	var hashedPassword string
+	DB.QueryRow(
+		"SELECT password FROM MEMBER WHERE id = $1", id).Scan(&hashedPassword)
+	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(unhashedPassword))
+	return err == nil
 }
 
 func IsUserActive(id string) {
