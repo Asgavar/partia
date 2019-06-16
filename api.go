@@ -83,6 +83,11 @@ func Actions(rawJson string) PartiaOutput {
 
 	sql += " ORDER BY action ASC"
 
+	if actionType == "" {
+		sql = strings.ReplaceAll(sql, "$2", "$1")
+		sql = strings.ReplaceAll(sql, "$3", "$1")
+	}
+
 	rows, _ := DB.Query(sql, queryArgs...)
 
 	var data []interface{}
